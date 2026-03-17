@@ -3,7 +3,7 @@
 # Base: runpod/worker-comfyui (clean ComfyUI, no models)
 # Models: loaded from Network Volume at /runpod-volume
 # =============================================================================
-FROM runpod/worker-comfyui:latest-base
+FROM runpod/worker-comfyui:5.7.1-base
 
 # ---------------------------------------------------------------------------
 # 1. Pip dependencies (pinned versions from TriaAds setup guide)
