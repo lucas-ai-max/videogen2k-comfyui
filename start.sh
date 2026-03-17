@@ -22,5 +22,24 @@ if [ -f "${MODELS}/loras/WanVideo/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distil
            "${MODELS}/loras/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors" 2>/dev/null
 fi
 
+# Patch handler to capture audio AND video files (not just images)
+echo "[PATCH] Patching handler to support audio/video output..."
+HANDLER="/handler.py"
+if [ -f "$HANDLER" ]; then
+    # Add mp3, wav, mp4, webm to the file extensions the handler looks for
+    sed -i 's/IMAGE_EXTENSIONS = \[/IMAGE_EXTENSIONS = [".mp3", ".wav", ".mp4", ".webm", /' "$HANDLER" 2>/dev/null
+    # Also try alternative patterns
+    sed -i "s/\\.png'/'.png', '.mp3', '.wav', '.mp4', '.webm'/" "$HANDLER" 2>/dev/null
+    sed -i 's/\.png"/.png", ".mp3", ".wav", ".mp4", ".webm"/' "$HANDLER" 2>/dev/null
+    # Broader approach: replace image-only glob with all files
+    sed -i 's/glob\.glob.*\.png/glob.glob(os.path.join(output_dir, "**", "*.*")/' "$HANDLER" 2>/dev/null
+    echo "[PATCH] Handler patched"
+else
+    echo "[WARNING] Handler not found at $HANDLER"
+    # Try alternative locations
+    find / -name "handler.py" -path "*/src/*" 2>/dev/null | head -5
+    find / -name "rp_handler.py" 2>/dev/null | head -5
+fi
+
 echo "Starting worker..."
 exec /start.sh
